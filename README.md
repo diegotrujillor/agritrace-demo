@@ -1,70 +1,59 @@
-# Getting Started with Create React App
+# AgriTrace — Demo Navegable MVP
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## 🚀 Demo en vivo
 
-## Available Scripts
+**[https://5jq44r.csb.app/](https://5jq44r.csb.app/)**
 
-In the project directory, you can run:
+Abre el link en cualquier navegador — móvil o desktop — sin instalación.
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Qué es esto
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Prototipo navegable del MVP de **AgriTrace**: plataforma de trazabilidad agrícola
+con enfoque Farmer-First, Mobile-Only, Offline-First.
 
-### `npm test`
+Permite explorar las 10 pantallas del flujo productor antes de la implementación
+en Flutter. Útil para validación con stakeholders, user testing y feedback de UX.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Pantallas incluidas (MVP — 10 pantallas)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| # | Pantalla |
+|---|----------|
+| 1 | Bienvenida |
+| 2 | Registro |
+| 3 | Login |
+| 4 | Dashboard vacío |
+| 5 | Dashboard con fincas |
+| 6 | Registrar finca |
+| 7 | Vista finca |
+| 8 | Registrar lote |
+| 9 | Vista lote + timeline actividades ⭐ |
+| 10 | Registrar actividad |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Las pantallas **Phase 2** (Generar QR, Trazabilidad pública) están visibles en gris
+como referencia — no forman parte del MVP.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Correr localmente
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm install
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Requiere Node.js 18+. Abre [http://localhost:3000](http://localhost:3000).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Repositorios relacionados
 
-## Learn More
+- [`agritrace-prototype`](https://github.com/diegotrujillor/agritrace-prototype) — código fuente del prototipo + arquitectura
+- [`agritrace-docs`](https://github.com/diegotrujillor/agritrace-docs) — documentación MVP completa
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+*AgriTrace — Trazabilidad que conecta · © 2025 Diego Trujillo*
