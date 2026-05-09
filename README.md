@@ -1,5 +1,19 @@
 # AgriTrace — Demo Navegable MVP
 
+## Para productores: ¿qué es AgriTrace?
+
+App móvil para que productores documenten en su celular lo que hacen en la finca —siembras, fertilizaciones, aplicación de químicos, cosechas— con fechas, fotos y notas. **Funciona sin internet** en zonas rurales con baja señal.
+
+**¿Para qué sirve?** Cuando un comprador pide pruebas de cómo cultivó (trazabilidad, certificación), está todo listo, exportable a PDF.
+
+**¿A quién apunta el MVP?** Pequeños productores en **Valle del Cauca** (cacao, caña panelera, hortalizas, frutas).
+
+**¿Cuánto cuesta?** Mes 1 **gratis** con commitment contract; Mes 2 en adelante **$29.990 COP/mes**.
+
+**¿Quiero pilotearlo?** Escríbele a Diego: `diegotrujillor@gmail.com` o WhatsApp `+57-XXX-XXX-XXXX`.
+
+---
+
 ## 🚀 Demo en vivo
 
 **[https://5jq44r.csb.app/](https://5jq44r.csb.app/)**
@@ -15,6 +29,8 @@ con enfoque Farmer-First, Mobile-Only, Offline-First.
 
 Permite explorar las 10 pantallas del flujo productor antes de la implementación
 en Flutter. Útil para validación con stakeholders, user testing y feedback de UX.
+
+**Estrategia comercial Phase 1**: ver [`agritrace-docs/01-preparacion-mvp/10-comercial-gtm/`](https://github.com/diegotrujillor/agritrace-docs/tree/main/01-preparacion-mvp/10-comercial-gtm).
 
 ---
 
