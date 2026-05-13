@@ -30,7 +30,7 @@ con enfoque Farmer-First, Mobile-Only, Offline-First.
 Permite explorar las 10 pantallas del flujo productor antes de la implementación
 en Flutter. Útil para validación con stakeholders, user testing y feedback de UX.
 
-**Estrategia comercial Phase 1**: ver [`agritrace-docs/01-preparacion-mvp/10-comercial-gtm/`](https://github.com/diegotrujillor/agritrace-docs/tree/main/01-preparacion-mvp/10-comercial-gtm).
+**Estrategia comercial MVP**: ver [`agritrace-docs/01-preparacion-mvp/10-comercial-gtm/`](https://github.com/diegotrujillor/agritrace-docs/tree/main/01-preparacion-mvp/10-comercial-gtm).
 
 ---
 
@@ -49,7 +49,7 @@ en Flutter. Útil para validación con stakeholders, user testing y feedback de 
 | 9 | Vista lote + timeline actividades ⭐ |
 | 10 | Registrar actividad |
 
-Las pantallas **Phase 2** (Generar QR, Trazabilidad pública) están visibles en gris
+Las pantallas **iteración futura** (Generar QR, Trazabilidad pública) están visibles en gris
 como referencia — no forman parte del MVP.
 
 ---
