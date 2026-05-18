@@ -16,7 +16,7 @@ App móvil para que productores documenten en su celular lo que hacen en la finc
 
 ## 🚀 Demo en vivo
 
-**[https://5jq44r.csb.app/](https://5jq44r.csb.app/)**
+**[https://agritrace-demo.vercel.app](https://agritrace-demo.vercel.app)**
 
 Abre el link en cualquier navegador — móvil o desktop — sin instalación.
 
