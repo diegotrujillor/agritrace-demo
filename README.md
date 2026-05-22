@@ -73,3 +73,18 @@ Requiere Node.js 18+. Abre [http://localhost:3000](http://localhost:3000).
 ---
 
 *AgriTrace — Trazabilidad que conecta · © 2025 Diego Trujillo*
+
+---
+
+## Licencia
+
+**Copyright © 2025–2026 Diego Trujillo R.**
+
+Este proyecto está publicado bajo **MIT + Commons Clause**:
+
+- ✅ Puedes estudiar, modificar y redistribuir para uso personal o no comercial
+- ✅ Puedes contribuir mejoras (pull requests bienvenidos)
+- ❌ **No puedes vender** este software ni ofrecer servicios comerciales basados en él sin autorización expresa del autor
+
+Ver [`LICENSE`](LICENSE) para el texto completo.  
+Uso comercial → [diegotrujillor@gmail.com](mailto:diegotrujillor@gmail.com)
