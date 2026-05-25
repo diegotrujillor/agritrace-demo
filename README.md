@@ -10,7 +10,7 @@ App móvil para que productores documenten en su celular lo que hacen en la finc
 
 **¿Cuánto cuesta?** Mes 1 **gratis** con commitment contract; Mes 2 en adelante **$29.990 COP/mes**.
 
-**¿Quiero pilotearlo?** Escríbele a Diego: `diegotrujillor@gmail.com` o WhatsApp `+57-XXX-XXX-XXXX`.
+**¿Quiero pilotearlo?** Escríbele a Diego: `diegotrujillor@gmail.com`.
 
 ---
 
