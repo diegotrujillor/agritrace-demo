@@ -8,7 +8,7 @@ App móvil para que productores documenten en su celular lo que hacen en la finc
 
 **¿A quién apunta el MVP?** Pequeños productores en **Valle del Cauca** (cacao, caña panelera, hortalizas, frutas).
 
-**¿Cuánto cuesta?** Mes 1 **gratis** con commitment contract; Mes 2 en adelante **$29.990 COP/mes**.
+**¿Cuánto cuesta?** Modelo escalonado: Mes 1 **gratis** con commitment contract → Mes 2 y 3 = **$14.900 COP/mes** (precio introductorio) → Mes 4 en adelante = **$29.900 COP/mes** (tarifa full).
 
 **¿Quiero pilotearlo?** Escríbele a Diego: `diegotrujillor@gmail.com`.
 
