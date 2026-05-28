@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { ChevronRight, ChevronLeft, MapPin, Calendar, Camera, Download, Search, Leaf, Droplets, Scissors, Package, Bell, Plus, Check, CloudOff, AlertCircle } from 'lucide-react';
 
 // ============================================================================
@@ -34,12 +34,102 @@ const MVP_SCREENS = [
 const DEFERRED_SCREENS = ['generarQR', 'paginaPublica'];
 
 // ============================================================================
+// CONTEXT + DEMO STATE (actividades + offline simulation)
+// ============================================================================
+
+const STORAGE_KEY = 'agritrace_demo_actividades';
+const SYNC_DELAY_MS = 1500;
+
+const AppContext = createContext(null);
+const useApp = () => useContext(AppContext);
+
+const TIPO_META = {
+  Siembra: { icono: Leaf, color: '#2D7A3E' },
+  Riego: { icono: Droplets, color: '#1976D2' },
+  Fertilización: { icono: Droplets, color: '#1976D2' },
+  Poda: { icono: Scissors, color: '#6D4C3D' },
+  Cosecha: { icono: Package, color: '#F9A825' },
+};
+
+const SEED_ACTIVIDADES = [
+  { id: 's1', tipo: 'Siembra', fecha: '15 Ene 2026', notas: 'Variedad Geisha, 200 plantas', syncStatus: 'synced' },
+  { id: 's2', tipo: 'Fertilización', fecha: '3 Feb 2026', notas: 'Abono orgánico 15 kg/ha', syncStatus: 'synced' },
+  { id: 's3', tipo: 'Poda', fecha: '28 Feb 2026', notas: 'Poda de formación', syncStatus: 'synced' },
+  { id: 's4', tipo: 'Fertilización', fecha: '15 Mar 2026', notas: 'Urea 10 kg/ha — dosis normal', syncStatus: 'synced' },
+  { id: 's5', tipo: 'Cosecha', fecha: '10 Abr 2026', notas: '85 kg cerezo rojo', syncStatus: 'synced' },
+];
+
+const MONTHS_ES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const formatFecha = (d) => `${d.getDate()} ${MONTHS_ES[d.getMonth()]} ${d.getFullYear()}`;
+
+const loadActividades = () => {
+  try {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(STORAGE_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    // ignore corrupt storage; fall back to seed
+  }
+  return SEED_ACTIVIDADES;
+};
+
+const persistActividades = (list) => {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+  } catch (e) {
+    // quota / disabled storage — silently ignore for demo
+  }
+};
+
+// ============================================================================
 // APP PRINCIPAL - AgriTrace Prototype
 // ============================================================================
 
 export default function AgriTracePrototype() {
   const [currentScreen, setCurrentScreen] = useState('splash');
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [actividades, setActividades] = useState(loadActividades);
+
+  useEffect(() => {
+    persistActividades(actividades);
+  }, [actividades]);
+
+  useEffect(() => {
+    if (!isOnline) return undefined;
+    const hasPending = actividades.some((a) => a.syncStatus === 'pending');
+    if (!hasPending) return undefined;
+    const t = setTimeout(() => {
+      setActividades((prev) =>
+        prev.map((a) => (a.syncStatus === 'pending' ? { ...a, syncStatus: 'synced' } : a))
+      );
+    }, SYNC_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [isOnline, actividades]);
+
+  const addActividad = ({ tipo, notas }) => {
+    const fecha = formatFecha(new Date());
+    setActividades((prev) => [
+      ...prev,
+      {
+        id: `a${Date.now()}`,
+        tipo,
+        fecha,
+        notas: notas || 'Sin observaciones',
+        syncStatus: isOnline ? 'synced' : 'pending',
+      },
+    ]);
+  };
+
+  const toggleOnline = () => setIsOnline((v) => !v);
+
+  const resetActividades = () => setActividades(SEED_ACTIVIDADES);
+
+  const ctx = { actividades, addActividad, isOnline, toggleOnline, resetActividades };
 
   const navigateTo = (screen) => {
     setIsAnimating(true);
@@ -75,6 +165,7 @@ export default function AgriTracePrototype() {
   };
 
   return (
+    <AppContext.Provider value={ctx}>
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-4">
       {/* Phone Frame */}
       <div className="relative">
@@ -90,6 +181,7 @@ export default function AgriTracePrototype() {
           <div className="absolute top-0 left-0 right-0 h-11 bg-transparent z-50 flex items-center justify-between px-8">
             <span className="text-xs font-medium" style={{ color: colors.negro }}>9:41</span>
             <div className="flex items-center gap-1">
+              {!isOnline && <CloudOff size={12} style={{ color: colors.warning }} />}
               <div className="w-4 h-2 border border-current rounded-sm">
                 <div className="w-3/4 h-full bg-current rounded-sm" />
               </div>
@@ -104,6 +196,32 @@ export default function AgriTracePrototype() {
           {/* Home indicator */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full" />
         </div>
+      </div>
+
+      {/* Demo controls — offline toggle + reset */}
+      <div className="absolute bottom-4 right-4 bg-white/90 backdrop-blur rounded-lg p-3 shadow-lg max-w-[180px]">
+        <p className="text-xs font-semibold text-gray-700 mb-2">Modo demo</p>
+        <button
+          onClick={toggleOnline}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border-2 transition-all w-full justify-center"
+          style={{
+            backgroundColor: isOnline ? colors.verdeClaro : '#FFF3E0',
+            borderColor: isOnline ? colors.verdePrimario : colors.warning,
+            color: isOnline ? colors.verdePrimario : colors.warning,
+          }}
+        >
+          {isOnline ? <Check size={14} /> : <CloudOff size={14} />}
+          {isOnline ? 'En línea' : 'Sin conexión'}
+        </button>
+        <p className="text-[10px] text-gray-500 mt-2 leading-tight">
+          Click para simular pérdida de señal y ver el flujo offline.
+        </p>
+        <button
+          onClick={resetActividades}
+          className="mt-2 w-full text-[10px] text-gray-500 hover:text-gray-700 underline"
+        >
+          Reset actividades
+        </button>
       </div>
 
       {/* Navigation helper */}
@@ -142,6 +260,7 @@ export default function AgriTracePrototype() {
         </div>
       </div>
     </div>
+    </AppContext.Provider>
   );
 }
 
@@ -175,24 +294,29 @@ const Button = ({ children, variant = 'primary', onClick, icon: Icon, className 
   );
 };
 
-const TextField = ({ label, placeholder, type = 'text', suffix }) => (
-  <div className="space-y-2">
-    <label className="text-sm font-medium" style={{ color: colors.grisOscuro }}>
-      {label}
-    </label>
-    <div className="relative">
-      <input
-        type={type}
-        placeholder={placeholder}
-        className="w-full px-4 py-3 rounded-lg border text-sm transition-all focus:outline-none focus:ring-2"
-        style={{ borderColor: colors.grisClaro, color: colors.negro }}
-      />
-      {suffix && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">{suffix}</div>
-      )}
+const TextField = ({ label, placeholder, type = 'text', suffix, value, onChange }) => {
+  const controlled = value !== undefined;
+  const inputProps = controlled ? { value, onChange } : {};
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium" style={{ color: colors.grisOscuro }}>
+        {label}
+      </label>
+      <div className="relative">
+        <input
+          type={type}
+          placeholder={placeholder}
+          {...inputProps}
+          className="w-full px-4 py-3 rounded-lg border text-sm transition-all focus:outline-none focus:ring-2"
+          style={{ borderColor: colors.grisClaro, color: colors.negro }}
+        />
+        {suffix && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">{suffix}</div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const Card = ({ children, className = '', onClick }) => (
   <div
@@ -222,15 +346,20 @@ const Badge = ({ children, type = 'active' }) => {
   );
 };
 
-const OfflineBanner = () => (
-  <div
-    className="flex items-center gap-2 px-4 py-2 text-xs font-medium"
-    style={{ backgroundColor: '#FFF3E0', color: colors.warning }}
-  >
-    <CloudOff size={14} />
-    Sin conexión · Datos guardados localmente
-  </div>
-);
+const OfflineBanner = () => {
+  const app = useApp();
+  const isOnline = app ? app.isOnline : true;
+  if (isOnline) return null;
+  return (
+    <div
+      className="flex items-center gap-2 px-4 py-2 text-xs font-medium"
+      style={{ backgroundColor: '#FFF3E0', color: colors.warning }}
+    >
+      <CloudOff size={14} />
+      Sin conexión · Datos guardados localmente
+    </div>
+  );
+};
 
 const AgriTraceLogo = ({ size = 80, showText = true }) => (
   <div className="flex flex-col items-center">
@@ -825,96 +954,135 @@ const RegistrarLoteScreen = ({ onNavigate }) => (
 // PANTALLA 9: VISTA LOTE + TIMELINE ACTIVIDADES  ⭐ PANTALLA MÁS IMPORTANTE
 // ============================================================================
 
-const ACTIVIDADES = [
-  { tipo: 'Siembra', fecha: '15 Ene 2026', icono: Leaf, notas: 'Variedad Geisha, 200 plantas', color: colors.verdePrimario },
-  { tipo: 'Fertilización', fecha: '3 Feb 2026', icono: Droplets, notas: 'Abono orgánico 15 kg/ha', color: colors.azulCertificacion },
-  { tipo: 'Poda', fecha: '28 Feb 2026', icono: Scissors, notas: 'Poda de formación', color: colors.cafeTierra },
-  { tipo: 'Fertilización', fecha: '15 Mar 2026', icono: Droplets, notas: 'Urea 10 kg/ha — dosis normal', color: colors.azulCertificacion },
-  { tipo: 'Cosecha', fecha: '10 Abr 2026', icono: Package, notas: '85 kg cerezo rojo', color: colors.amarilloCosecha },
-];
+const FALLBACK_TIPO_META = { icono: Leaf, color: colors.grisMedio };
 
-const VistaLoteScreen = ({ onNavigate }) => (
-  <div className="h-full flex flex-col" style={{ backgroundColor: colors.grisMuyClaro }}>
-    <div className="bg-white border-b" style={{ borderColor: colors.grisClaro }}>
-      <div className="flex items-center px-4 py-3">
-        <button onClick={() => onNavigate('vistaFinca')} className="p-2 -ml-2">
-          <ChevronLeft size={24} style={{ color: colors.negro }} />
-        </button>
-        <div className="ml-2 flex-1">
-          <span className="font-medium">Lote Norte</span>
-          <p className="text-xs" style={{ color: colors.grisMedio }}>Café Geisha · 1.2 ha</p>
+const SyncBadge = ({ status }) => {
+  if (status === 'pending') {
+    return (
+      <span
+        className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded font-medium"
+        style={{ backgroundColor: '#FFF3E0', color: colors.warning }}
+      >
+        <AlertCircle size={10} />
+        Pendiente sync
+      </span>
+    );
+  }
+  return (
+    <span
+      className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded font-medium"
+      style={{ backgroundColor: colors.verdeClaro, color: colors.verdePrimario }}
+    >
+      <Check size={10} />
+      Sincronizado
+    </span>
+  );
+};
+
+const VistaLoteScreen = ({ onNavigate }) => {
+  const { actividades } = useApp();
+  const display = [...actividades].reverse();
+
+  return (
+    <div className="h-full flex flex-col" style={{ backgroundColor: colors.grisMuyClaro }}>
+      <div className="bg-white border-b" style={{ borderColor: colors.grisClaro }}>
+        <div className="flex items-center px-4 py-3">
+          <button onClick={() => onNavigate('vistaFinca')} className="p-2 -ml-2">
+            <ChevronLeft size={24} style={{ color: colors.negro }} />
+          </button>
+          <div className="ml-2 flex-1">
+            <span className="font-medium">Lote Norte</span>
+            <p className="text-xs" style={{ color: colors.grisMedio }}>Café Geisha · 1.2 ha</p>
+          </div>
+        </div>
+        <OfflineBanner />
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4">
+        <h3 className="font-semibold mb-4 text-sm" style={{ color: colors.grisOscuro }}>
+          Historial de actividades ({actividades.length})
+        </h3>
+
+        <div className="relative">
+          {/* Vertical timeline line */}
+          <div
+            className="absolute left-5 top-2 bottom-2 w-0.5"
+            style={{ backgroundColor: colors.grisClaro }}
+          />
+
+          <div className="space-y-4">
+            {display.map((act) => {
+              const meta = TIPO_META[act.tipo] || FALLBACK_TIPO_META;
+              const Icon = meta.icono;
+              return (
+                <div key={act.id} className="flex gap-4">
+                  <div
+                    className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: meta.color + '20', border: `2px solid ${meta.color}` }}
+                  >
+                    <Icon size={18} style={{ color: meta.color }} />
+                  </div>
+                  <div
+                    className="flex-1 bg-white rounded-xl p-4 shadow-sm border"
+                    style={{ borderColor: colors.grisClaro }}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-medium text-sm" style={{ color: colors.negro }}>{act.tipo}</span>
+                      <span className="text-xs whitespace-nowrap" style={{ color: colors.grisMedio }}>{act.fecha}</span>
+                    </div>
+                    <p className="text-xs mt-1" style={{ color: colors.grisOscuro }}>{act.notas}</p>
+                    <div className="flex items-center justify-between mt-2 gap-2">
+                      <div className="flex items-center gap-1">
+                        <Camera size={10} style={{ color: colors.verdePrimario }} />
+                        <span className="text-xs" style={{ color: colors.grisMedio }}>1 foto adjunta</span>
+                      </div>
+                      <SyncBadge status={act.syncStatus} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
-      <OfflineBanner />
-    </div>
 
-    <div className="flex-1 overflow-y-auto p-4">
-      <h3 className="font-semibold mb-4 text-sm" style={{ color: colors.grisOscuro }}>
-        Historial de actividades ({ACTIVIDADES.length})
-      </h3>
-
-      <div className="relative">
-        {/* Vertical timeline line */}
-        <div
-          className="absolute left-5 top-2 bottom-2 w-0.5"
-          style={{ backgroundColor: colors.grisClaro }}
-        />
-
-        <div className="space-y-4">
-          {ACTIVIDADES.map((act, i) => {
-            const Icon = act.icono;
-            return (
-              <div key={i} className="flex gap-4">
-                <div
-                  className="relative z-10 w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: act.color + '20', border: `2px solid ${act.color}` }}
-                >
-                  <Icon size={18} style={{ color: act.color }} />
-                </div>
-                <div
-                  className="flex-1 bg-white rounded-xl p-4 shadow-sm border"
-                  style={{ borderColor: colors.grisClaro }}
-                >
-                  <div className="flex items-start justify-between">
-                    <span className="font-medium text-sm" style={{ color: colors.negro }}>{act.tipo}</span>
-                    <span className="text-xs" style={{ color: colors.grisMedio }}>{act.fecha}</span>
-                  </div>
-                  <p className="text-xs mt-1" style={{ color: colors.grisOscuro }}>{act.notas}</p>
-                  <div className="flex items-center gap-1 mt-2">
-                    <Camera size={10} style={{ color: colors.verdePrimario }} />
-                    <span className="text-xs" style={{ color: colors.grisMedio }}>1 foto adjunta</span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="p-4 bg-white border-t" style={{ borderColor: colors.grisClaro }}>
+        <Button onClick={() => onNavigate('registrarActividad')}>
+          <Plus size={18} />
+          Registrar actividad
+        </Button>
       </div>
     </div>
-
-    <div className="p-4 bg-white border-t" style={{ borderColor: colors.grisClaro }}>
-      <Button onClick={() => onNavigate('registrarActividad')}>
-        <Plus size={18} />
-        Registrar actividad
-      </Button>
-    </div>
-  </div>
-);
+  );
+};
 
 // ============================================================================
 // PANTALLA 10: REGISTRAR ACTIVIDAD
 // ============================================================================
 
 const TIPOS_ACTIVIDAD = [
-  { label: 'Siembra', icono: Leaf, color: colors.verdePrimario },
-  { label: 'Riego', icono: Droplets, color: colors.azulCertificacion },
-  { label: 'Fertiliz.', icono: Package, color: colors.cafeTierra },
-  { label: 'Poda', icono: Scissors, color: colors.warning },
-  { label: 'Cosecha', icono: Package, color: colors.amarilloCosecha },
+  { value: 'Siembra', short: 'Siembra' },
+  { value: 'Riego', short: 'Riego' },
+  { value: 'Fertilización', short: 'Fertiliz.' },
+  { value: 'Poda', short: 'Poda' },
+  { value: 'Cosecha', short: 'Cosecha' },
 ];
 
 const RegistrarActividadScreen = ({ onNavigate }) => {
-  const [selectedTipo, setSelectedTipo] = useState('Fertiliz.');
+  const { isOnline, addActividad } = useApp();
+  const [selectedTipo, setSelectedTipo] = useState('Fertilización');
+  const [insumo, setInsumo] = useState('');
+  const [notas, setNotas] = useState('');
+
+  const handleSave = () => {
+    const notasFinal = [insumo.trim(), notas.trim()].filter(Boolean).join(' — ');
+    addActividad({ tipo: selectedTipo, notas: notasFinal });
+    onNavigate('vistaLote');
+  };
+
+  const statusPillStyle = isOnline
+    ? { backgroundColor: colors.verdeClaro, color: colors.verdePrimario }
+    : { backgroundColor: '#FFF3E0', color: colors.warning };
 
   return (
     <div className="h-full flex flex-col" style={{ backgroundColor: colors.grisMuyClaro }}>
@@ -923,11 +1091,8 @@ const RegistrarActividadScreen = ({ onNavigate }) => {
           <ChevronLeft size={24} style={{ color: colors.negro }} />
         </button>
         <span className="ml-2 font-medium">Registrar actividad</span>
-        <span
-          className="ml-auto text-xs px-2 py-1 rounded"
-          style={{ backgroundColor: '#FFF3E0', color: colors.warning }}
-        >
-          Sin conexión
+        <span className="ml-auto text-xs px-2 py-1 rounded font-medium" style={statusPillStyle}>
+          {isOnline ? 'En línea' : 'Sin conexión'}
         </span>
       </div>
 
@@ -939,25 +1104,30 @@ const RegistrarActividadScreen = ({ onNavigate }) => {
                 Tipo de actividad
               </label>
               <div className="grid grid-cols-5 gap-2">
-                {TIPOS_ACTIVIDAD.map(({ label, icono: Icon, color }) => (
-                  <button
-                    key={label}
-                    onClick={() => setSelectedTipo(label)}
-                    className="flex flex-col items-center p-2 rounded-lg border-2 transition-all"
-                    style={{
-                      borderColor: selectedTipo === label ? color : colors.grisClaro,
-                      backgroundColor: selectedTipo === label ? color + '15' : 'transparent',
-                    }}
-                  >
-                    <Icon size={22} style={{ color: selectedTipo === label ? color : colors.grisMedio }} />
-                    <span
-                      className="mt-1"
-                      style={{ color: selectedTipo === label ? color : colors.grisMedio, fontSize: '0.6rem' }}
+                {TIPOS_ACTIVIDAD.map(({ value, short }) => {
+                  const meta = TIPO_META[value] || FALLBACK_TIPO_META;
+                  const Icon = meta.icono;
+                  const active = selectedTipo === value;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setSelectedTipo(value)}
+                      className="flex flex-col items-center p-2 rounded-lg border-2 transition-all"
+                      style={{
+                        borderColor: active ? meta.color : colors.grisClaro,
+                        backgroundColor: active ? meta.color + '15' : 'transparent',
+                      }}
                     >
-                      {label}
-                    </span>
-                  </button>
-                ))}
+                      <Icon size={22} style={{ color: active ? meta.color : colors.grisMedio }} />
+                      <span
+                        className="mt-1"
+                        style={{ color: active ? meta.color : colors.grisMedio, fontSize: '0.6rem' }}
+                      >
+                        {short}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -969,12 +1139,17 @@ const RegistrarActividadScreen = ({ onNavigate }) => {
                 className="flex items-center justify-between px-4 py-3 rounded-lg border"
                 style={{ borderColor: colors.grisClaro }}
               >
-                <span className="text-sm" style={{ color: colors.negro }}>Hoy — 3 May 2026</span>
+                <span className="text-sm" style={{ color: colors.negro }}>Hoy — {formatFecha(new Date())}</span>
                 <Calendar size={18} style={{ color: colors.grisMedio }} />
               </div>
             </div>
 
-            <TextField label="Insumo / Dosis" placeholder="Ej: Urea 10 kg/ha" />
+            <TextField
+              label="Insumo / Dosis"
+              placeholder="Ej: Urea 10 kg/ha"
+              value={insumo}
+              onChange={(e) => setInsumo(e.target.value)}
+            />
 
             <button
               className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed text-sm font-medium"
@@ -990,6 +1165,8 @@ const RegistrarActividadScreen = ({ onNavigate }) => {
               </label>
               <textarea
                 placeholder="Escribe observaciones adicionales..."
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border text-sm h-24 resize-none"
                 style={{ borderColor: colors.grisClaro }}
               />
@@ -997,10 +1174,12 @@ const RegistrarActividadScreen = ({ onNavigate }) => {
           </div>
 
           <div className="mt-6">
-            <Button onClick={() => onNavigate('vistaLote')}>Guardar actividad</Button>
+            <Button onClick={handleSave}>Guardar actividad</Button>
           </div>
           <p className="text-center mt-3 text-xs" style={{ color: colors.grisMedio }}>
-            Guardado localmente · Sync automático al recuperar señal
+            {isOnline
+              ? 'Guardado y sincronizado al servidor'
+              : 'Guardado localmente · Sync automático al recuperar señal'}
           </p>
         </Card>
       </div>
