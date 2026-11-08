@@ -8,7 +8,7 @@ App móvil para que productores documenten en su celular lo que hacen en la finc
 
 **¿A quién apunta el MVP?** Pequeños productores en **Valle del Cauca** (cacao, caña panelera, hortalizas, frutas).
 
-**¿Cuánto cuesta?** Tarifa única **$29.900 COP/mes**, pagada por adelantado desde el Mes 1, con **garantía de devolución del 100% en 30 días**.
+**¿Cuánto cuesta?** Tarifa única **$29.900 COP/mes por productor**, pagada por adelantado desde el Mes 1, con **garantía de devolución del 100% en 30 días**.
 
 **¿Quiero pilotearlo?** Escríbele a Diego: `diegotrujillor@gmail.com`.
 
